@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FAnimeList - Tu Biblioteca Personal</title>
+    
     <link rel="icon" type="image/png" href="icon.png">
+    
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -37,17 +39,15 @@
             background-attachment: fixed;
         }
 
-        /* Capa de difuminado (Blur) y Overlay de color */
         .app-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1;
-            backdrop-filter: blur(3px); /* El "canvas" que difumina */
+            backdrop-filter: blur(3px);
             background-color: var(--bg-overlay);
             transition: var(--transition);
         }
 
-        /* Cambio de imagen para móvil */
         @media (max-width: 768px) {
             .app-background {
                 background-image: url('backgroundmobile.png');
@@ -246,6 +246,7 @@
                 showMenu();
                 document.getElementById('add-name').value = '';
                 document.getElementById('add-caps').value = '';
+                document.getElementById('add-img').value = '';
             };
 
             if (imgFile) {
