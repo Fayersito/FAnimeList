@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAnimeList - Tu Biblioteca Personal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            /* Modo Claro */
+            --bg-overlay: rgba(248, 250, 252, 0.7);
+            --card-light: rgba(255, 255, 255, 0.85);
+            --text-light: #1e293b;
+            --border-light: rgba(226, 232, 240, 0.6);
+
+            /* Modo Oscuro */
+            --bg-overlay-dark: rgba(15, 23, 42, 0.85);
+            --card-dark: rgba(30, 41, 59, 0.8);
+            --text-dark: #f1f5f9;
+            --border-dark: rgba(51, 65, 85, 0.5);
+
+            --visto: #10b981;
+            --transition: all 0.3s ease;
+        }
+
+        /* --- SISTEMA DE FONDO --- */
+        .app-background {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -2;
+            background-image: url('background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        /* Capa de difuminado (Blur) y Overlay de color */
+        .app-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            backdrop-filter: blur(3px); /* El "canvas" que difumina */
+            background-color: var(--bg-overlay);
+            transition: var(--transition);
+        }
+
+        /* Cambio de imagen para móvil */
+        @media (max-width: 768px) {
+            .app-background {
+                background-image: url('backgroundmobile.png');
+            }
+        }
+
+        /* --- ESTILOS BASE --- */
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-light);
+            min-height: 100vh;
+        }
+
+        body.dark-mode {
+            color: var(--text-dark);
+        }
+
+        body.dark-mode .app-overlay {
+            background-color: var(--bg-overlay-dark);
+        }
+
+        /* --- HEADER --- */
+        header {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(20px);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0; z-index: 100;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .dark-mode header {
+            background: rgba(15, 23, 42, 0.4);
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        .logo { font-size: 1.5rem; font-weight: 800; cursor: pointer; color: var(--primary); }
+        .logo span { color: var(--text-light); transition: var(--transition); }
+        .dark-mode .logo span { color: var(--text-dark); }
+
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; position: relative; }
+
+        /* --- TARJETAS --- */
+        .hero-form, .anime-card, .info-card, .episodes-container {
+            background: var(--card-light);
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--border-light);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+            transition: var(--transition);
+        }
+
+        .dark-mode .hero-form, 
+        .dark-mode .anime-card, 
+        .dark-mode .info-card, 
+        .dark-mode .episodes-container {
+            background: var(--card-dark);
+            border-color: var(--border-dark);
+        }
+
+        .hero-form {
+            padding: 2rem; margin-bottom: 3rem;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;
+        }
+
+        .anime-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 2rem;
+        }
+
+        .anime-card { overflow: hidden; cursor: pointer; }
+        .anime-card:hover { transform: translateY(-10px); box-shadow: 0 15px 45px rgba(0,0,0,0.15); }
+        .anime-card img { width: 100%; height: 280px; object-fit: cover; }
+        .anime-card-info { padding: 1.2rem; text-align: center; }
+
+        /* --- BOTONES --- */
+        .btn { padding: 0.8rem 1.5rem; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: var(--transition); display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { transform: scale(1.05); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4); }
+        
+        .theme-toggle { background: var(--border-light); border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; }
+        .dark-mode .theme-toggle { background: var(--border-dark); }
+
+        /* --- VISTA ANIME --- */
+        #view-anime { display: none; }
+        .anime-layout { display: grid; grid-template-columns: 320px 1fr; gap: 3rem; }
+        .sticky-side img { width: 100%; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+
+        .ep-row { display: flex; align-items: center; padding: 1rem; border-radius: 16px; margin-bottom: 0.8rem; cursor: pointer; transition: 0.2s; }
+        .ep-row:hover { background: rgba(99, 102, 241, 0.1); }
+        .ep-number { width: 40px; height: 40px; background: var(--primary); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; margin-right: 1.5rem; }
+        
+        .visto-badge { margin-left: auto; padding: 0.4rem 1rem; border-radius: 10px; font-size: 0.75rem; font-weight: 700; background: rgba(0,0,0,0.1); }
+        .is-visto { opacity: 0.6; }
+        .is-visto .visto-badge { background: var(--visto); color: white; }
+
+        input { padding: 0.8rem; border-radius: 12px; border: 1px solid var(--border-light); background: rgba(255,255,255,0.2); color: inherit; outline: none; }
+        .dark-mode input { border-color: var(--border-dark); background: rgba(0,0,0,0.2); }
+
+        @media (max-width: 850px) { .anime-layout { grid-template-columns: 1fr; } .hero-form { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <div class="app-background"></div>
+    <div class="app-overlay"></div>
+
+    <header>
+        <div class="logo" onclick="showMenu()">F<span>AnimeList</span></div>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+            <button class="btn btn-primary" onclick="showMenu()">Mis Animes</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <section id="view-menu">
+            <div class="hero-form">
+                <div style="display:flex; flex-direction:column; gap:5px;">
+                    <label style="font-size: 0.8rem; font-weight:bold;">Nombre del Anime</label>
+                    <input type="text" id="add-name" placeholder="Ej: Chainsaw Man">
+                </div>
+                <div style="display:flex; flex-direction:column; gap:5px;">
+                    <label style="font-size: 0.8rem; font-weight:bold;">Capítulos</label>
+                    <input type="number" id="add-caps" placeholder="Ej: 12">
+                </div>
+                <div style="display:flex; flex-direction:column; gap:5px;">
+                    <label style="font-size: 0.8rem; font-weight:bold;">Portada</label>
+                    <input type="file" id="add-img" accept="image/*">
+                </div>
+                <button class="btn btn-primary" onclick="saveNewAnime()">Añadir a Lista</button>
+            </div>
+
+            <div class="anime-grid" id="menu-grid"></div>
+        </section>
+
+        <section id="view-anime">
+            <div class="anime-layout">
+                <div class="sticky-side">
+                    <img id="detail-img" src="" alt="Portada">
+                    <button class="btn" style="background: #ef4444; color:white; width:100%; margin-top:1.5rem;" onclick="resetVistos()">Resetear Vistos</button>
+                    <button class="btn" style="background: #64748b; color:white; width:100%; margin-top:0.5rem;" onclick="deleteAnime()">Eliminar Anime</button>
+                </div>
+                <div>
+                    <h1 id="detail-title" style="font-size: 3rem; margin: 0;">Título</h1>
+                    <p style="color: var(--primary); font-weight: 600; margin-bottom: 2rem; letter-spacing: 1px;">BIBLIOTECA PERSONAL</p>
+                    
+                    <div class="episodes-container" style="padding: 2rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 2rem;">
+                            <h3 style="margin:0">Episodios</h3>
+                            <span id="progress-text" style="font-weight: 800; color: var(--primary);">0 / 0</span>
+                        </div>
+                        <div id="episodes-list"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        let animes = JSON.parse(localStorage.getItem('fAnimeList')) || [];
+        let currentIdx = null;
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        }
+        if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
+
+        function showMenu() {
+            document.getElementById('view-menu').style.display = 'block';
+            document.getElementById('view-anime').style.display = 'none';
+            renderMenu();
+        }
+
+        function showAnime(index) {
+            currentIdx = index;
+            const anime = animes[index];
+            document.getElementById('view-menu').style.display = 'none';
+            document.getElementById('view-anime').style.display = 'block';
+            document.getElementById('detail-title').innerText = anime.name;
+            document.getElementById('detail-img').src = anime.image || 'https://via.placeholder.com/300x450';
+            renderEpisodes();
+        }
+
+        function saveNewAnime() {
+            const name = document.getElementById('add-name').value;
+            const caps = parseInt(document.getElementById('add-caps').value);
+            const imgFile = document.getElementById('add-img').files[0];
+            if (!name || !caps) return alert("Rellena los campos necesarios.");
+
+            const process = (imgData) => {
+                animes.push({ name, caps, image: imgData, vistos: [] });
+                localStorage.setItem('fAnimeList', JSON.stringify(animes));
+                showMenu();
+                document.getElementById('add-name').value = '';
+                document.getElementById('add-caps').value = '';
+            };
+
+            if (imgFile) {
+                const reader = new FileReader();
+                reader.onloadend = () => process(reader.result);
+                reader.readAsDataURL(imgFile);
+            } else { process(null); }
+        }
+
+        function renderMenu() {
+            const grid = document.getElementById('menu-grid');
+            grid.innerHTML = '';
+            animes.forEach((anime, i) => {
+                grid.innerHTML += `
+                    <div class="anime-card" onclick="showAnime(${i})">
+                        <img src="${anime.image || 'https://via.placeholder.com/300x450?text=FAnimeList'}">
+                        <div class="anime-card-info">
+                            <h4 style="margin:0">${anime.name}</h4>
+                            <small style="color:var(--primary); font-weight:bold;">${anime.vistos.length} / ${anime.caps} caps</small>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderEpisodes() {
+            const anime = animes[currentIdx];
+            const list = document.getElementById('episodes-list');
+            list.innerHTML = '';
+            document.getElementById('progress-text').innerText = `${anime.vistos.length} / ${anime.caps} VISTOS`;
+
+            for (let i = 1; i <= anime.caps; i++) {
+                const isVisto = anime.vistos.includes(i);
+                const div = document.createElement('div');
+                div.className = `ep-row ${isVisto ? 'is-visto' : ''}`;
+                div.innerHTML = `
+                    <div class="ep-number">${i}</div>
+                    <div style="font-weight:600">Episodio ${i}</div>
+                    <div class="visto-badge">${isVisto ? 'VISTO' : 'PENDIENTE'}</div>
+                `;
+                div.onclick = () => {
+                    const vIdx = anime.vistos.indexOf(i);
+                    if (vIdx > -1) anime.vistos.splice(vIdx, 1);
+                    else anime.vistos.push(i);
+                    localStorage.setItem('fAnimeList', JSON.stringify(animes));
+                    renderEpisodes();
+                };
+                list.appendChild(div);
+            }
+        }
+
+        function resetVistos() {
+            if(confirm("¿Reiniciar progreso?")) {
+                animes[currentIdx].vistos = [];
+                localStorage.setItem('fAnimeList', JSON.stringify(animes));
+                renderEpisodes();
+            }
+        }
+
+        function deleteAnime() {
+            if(confirm("¿Eliminar anime de la lista?")) {
+                animes.splice(currentIdx, 1);
+                localStorage.setItem('fAnimeList', JSON.stringify(animes));
+                showMenu();
+            }
+        }
+
+        showMenu();
+    </script>
+</body>
+</html>
