@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAnimeList - Tu Biblioteca Personal</title>
+    <title>FAnimeList - Tu Biblioteca & Calendario</title>
     
     <link rel="icon" type="image/png" href="icon.png?v=1">
     <link rel="shortcut icon" href="icon.png?v=1">
@@ -68,7 +68,7 @@
         .dark-mode .logo span { color: var(--text-dark); }
         .container { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; position: relative; }
 
-        .hero-form, .anime-card, .info-card, .episodes-container {
+        .hero-form, .anime-card, .info-card, .episodes-container, .calendar-container {
             background: var(--card-light);
             backdrop-filter: blur(5px);
             border: 1px solid var(--border-light);
@@ -77,23 +77,24 @@
             transition: var(--transition);
         }
 
-        .dark-mode .hero-form, .dark-mode .anime-card, .dark-mode .info-card, .dark-mode .episodes-container {
+        .dark-mode .hero-form, .dark-mode .anime-card, .dark-mode .info-card, .dark-mode .episodes-container, .dark-mode .calendar-container {
             background: var(--card-dark); border-color: var(--border-dark);
         }
 
-        .hero-form { padding: 2rem; margin-bottom: 3rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+        .hero-form { padding: 2rem; margin-bottom: 3rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; align-items: end; }
         .anime-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 2rem; }
         .anime-card { overflow: hidden; cursor: pointer; }
         .anime-card:hover { transform: translateY(-10px); box-shadow: 0 15px 45px rgba(0,0,0,0.15); }
         .anime-card img { width: 100%; height: 280px; object-fit: cover; }
         .anime-card-info { padding: 1.2rem; text-align: center; }
 
-        .btn { padding: 0.8rem 1.5rem; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: var(--transition); display: inline-flex; align-items: center; gap: 8px; }
+        .btn { padding: 0.8rem 1.5rem; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: var(--transition); display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
         .theme-toggle { background: var(--border-light); border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; }
         .dark-mode .theme-toggle { background: var(--border-dark); }
 
-        #view-anime { display: none; }
+        #view-anime, #view-calendar { display: none; }
         .anime-layout { display: grid; grid-template-columns: 320px 1fr; gap: 3rem; }
         .sticky-side img { width: 100%; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
 
@@ -104,10 +105,35 @@
         .is-visto { opacity: 0.6; }
         .is-visto .visto-badge { background: var(--visto); color: white; }
 
-        input { padding: 0.8rem; border-radius: 12px; border: 1px solid var(--border-light); background: rgba(255,255,255,0.2); color: inherit; outline: none; }
-        .dark-mode input { border-color: var(--border-dark); background: rgba(0,0,0,0.2); }
+        input, select { padding: 0.8rem; border-radius: 12px; border: 1px solid var(--border-light); background: rgba(255,255,255,0.2); color: inherit; outline: none; font-family: inherit; box-sizing: border-box; width: 100%; }
+        .dark-mode input, .dark-mode select { border-color: var(--border-dark); background: rgba(0,0,0,0.2); }
+        .dark-mode select option { background: #1e293b; color: #f1f5f9; }
 
-        @media (max-width: 850px) { .anime-layout { grid-template-columns: 1fr; } .hero-form { grid-template-columns: 1fr; } }
+        /* Estilos del Calendario */
+        .calendar-container { padding: 2rem; margin-bottom: 3rem; }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+        .calendar-day-name { text-align: center; font-weight: 600; font-size: 0.9rem; padding: 0.5rem 0; color: var(--primary); }
+        .calendar-day { min-height: 110px; border-radius: 16px; padding: 8px; border: 1px solid var(--border-light); display: flex; flex-direction: column; background: rgba(255,255,255,0.1); }
+        .dark-mode .calendar-day { border-color: var(--border-dark); background: rgba(0,0,0,0.1); }
+        .calendar-day.empty { background: transparent; border: none; }
+        .calendar-day.today { border: 2px solid var(--primary); box-shadow: 0 0 10px rgba(99, 102, 241, 0.3); }
+        .day-number { font-weight: 800; font-size: 0.9rem; margin-bottom: 6px; }
+        .calendar-releases { display: flex; flex-direction: column; gap: 4px; overflow-y: auto; max-height: 75px; }
+        
+        /* Eventos de anime en el calendario */
+        .calendar-event { display: flex; align-items: center; gap: 5px; background: var(--primary); color: white; padding: 3px 6px; border-radius: 6px; font-size: 0.7rem; font-weight: 600; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .calendar-event img { width: 16px; height: 16px; border-radius: 3px; object-fit: cover; }
+        .calendar-event:hover { filter: brightness(1.1); }
+
+        @media (max-width: 850px) { 
+            .anime-layout { grid-template-columns: 1fr; } 
+            .hero-form { grid-template-columns: 1fr; } 
+            .calendar-grid { gap: 4px; }
+            .calendar-day { min-height: 80px; padding: 4px; }
+            .calendar-event span { display: none; }
+            .day-number { font-size: 0.8rem; }
+        }
     </style>
 </head>
 <body>
@@ -120,6 +146,7 @@
         <div style="display: flex; gap: 1rem; align-items: center;">
             <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
             <button class="btn btn-primary" onclick="showMenu()">Mis Animes</button>
+            <button class="btn btn-primary" style="background:#10b981" onclick="showCalendarView()">Calendario</button>
         </div>
     </header>
 
@@ -133,6 +160,17 @@
                 <div style="display:flex; flex-direction:column; gap:5px;">
                     <label style="font-size: 0.8rem; font-weight:bold;">Capítulos</label>
                     <input type="number" id="add-caps" placeholder="Ej: 12">
+                </div>
+                <div style="display:flex; flex-direction:column; gap:5px;">
+                    <label style="font-size: 0.8rem; font-weight:bold;">Estado</label>
+                    <select id="add-status" onchange="toggleDateInput()">
+                        <option value="emision">En emisión</option>
+                        <option value="finalizado">Fuera de emisión</option>
+                    </select>
+                </div>
+                <div id="date-group" style="display:flex; flex-direction:column; gap:5px;">
+                    <label style="font-size: 0.8rem; font-weight:bold;">Fecha de Estreno (Ep 1)</label>
+                    <input type="date" id="add-date">
                 </div>
                 <div style="display:flex; flex-direction:column; gap:5px;">
                     <label style="font-size: 0.8rem; font-weight:bold;">Portada</label>
@@ -152,7 +190,7 @@
                 </div>
                 <div>
                     <h1 id="detail-title" style="font-size: 3rem; margin: 0;">Título</h1>
-                    <p style="color: var(--primary); font-weight: 600; margin-bottom: 2rem; letter-spacing: 1px;">BIBLIOTECA PERSONAL</p>
+                    <p id="detail-status" style="color: var(--primary); font-weight: 600; margin-bottom: 2rem; letter-spacing: 1px;">ESTADO</p>
                     <div class="episodes-container" style="padding: 2rem;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 2rem;">
                             <h3 style="margin:0">Episodios</h3>
@@ -163,11 +201,37 @@
                 </div>
             </div>
         </section>
+
+        <section id="view-calendar">
+            <div class="calendar-container">
+                <div class="calendar-header">
+                    <button class="btn btn-primary" onclick="changeMonth(-1)">◀ Anterior</button>
+                    <h2 id="calendar-month-year" style="margin:0; text-transform: capitalize;">Mes Año</h2>
+                    <button class="btn btn-primary" onclick="changeMonth(1)">Siguiente ▶</button>
+                </div>
+                <div class="calendar-grid" id="calendar-grid">
+                    </div>
+            </div>
+        </section>
     </div>
 
     <script>
         let animes = JSON.parse(localStorage.getItem('fAnimeList')) || [];
         let currentIdx = null;
+        let calendarDate = new Date();
+
+        document.getElementById('add-date').valueAsDate = new Date();
+
+        // Controla si se muestra o no la fecha dependiendo del estado seleccionado
+        function toggleDateInput() {
+            const status = document.getElementById('add-status').value;
+            const dateGroup = document.getElementById('date-group');
+            if (status === 'finalizado') {
+                dateGroup.style.display = 'none';
+            } else {
+                dateGroup.style.display = 'flex';
+            }
+        }
 
         function toggleTheme() {
             document.body.classList.toggle('dark-mode');
@@ -178,6 +242,7 @@
         function showMenu() {
             document.getElementById('view-menu').style.display = 'block';
             document.getElementById('view-anime').style.display = 'none';
+            document.getElementById('view-calendar').style.display = 'none';
             renderMenu();
         }
 
@@ -186,24 +251,52 @@
             const anime = animes[index];
             document.getElementById('view-menu').style.display = 'none';
             document.getElementById('view-anime').style.display = 'block';
+            document.getElementById('view-calendar').style.display = 'none';
             document.getElementById('detail-title').innerText = anime.name;
             document.getElementById('detail-img').src = anime.image || 'https://via.placeholder.com/300x450';
+            
+            const statusText = anime.status === 'finalizado' ? 'FUERA DE EMISIÓN / FINALIZADO' : 'EN EMISIÓN';
+            document.getElementById('detail-status').innerText = statusText;
+
             renderEpisodes();
+        }
+
+        function showCalendarView() {
+            document.getElementById('view-menu').style.display = 'none';
+            document.getElementById('view-anime').style.display = 'none';
+            document.getElementById('view-calendar').style.display = 'block';
+            renderCalendar();
         }
 
         function saveNewAnime() {
             const name = document.getElementById('add-name').value;
             const caps = parseInt(document.getElementById('add-caps').value);
+            const status = document.getElementById('add-status').value;
+            const startDate = document.getElementById('add-date').value;
             const imgFile = document.getElementById('add-img').files[0];
-            if (!name || !caps) return alert("Rellena los campos necesarios.");
+            
+            if (!name || !caps) return alert("Rellena el nombre y el número de capítulos.");
+            if (status === 'emision' && !startDate) return alert("Por favor, selecciona una fecha de lanzamiento para la emisión.");
 
             const process = (imgData) => {
-                animes.push({ name, caps, image: imgData, vistos: [] });
+                animes.push({ 
+                    name, 
+                    caps, 
+                    status, // 'emision' o 'finalizado'
+                    startDate: status === 'emision' ? startDate : null, 
+                    image: imgData, 
+                    vistos: [] 
+                });
                 localStorage.setItem('fAnimeList', JSON.stringify(animes));
                 showMenu();
+                
+                // Resetear campos del formulario
                 document.getElementById('add-name').value = '';
                 document.getElementById('add-caps').value = '';
+                document.getElementById('add-status').value = 'emision';
+                document.getElementById('add-date').valueAsDate = new Date();
                 document.getElementById('add-img').value = '';
+                toggleDateInput();
             };
 
             if (imgFile) {
@@ -217,11 +310,14 @@
             const grid = document.getElementById('menu-grid');
             grid.innerHTML = '';
             animes.forEach((anime, i) => {
+                const badgeStatus = anime.status === 'finalizado' ? 'Finalizado' : 'En Emisión';
+                const badgeColor = anime.status === 'finalizado' ? '#64748b' : 'var(--primary)';
                 grid.innerHTML += `
                     <div class="anime-card" onclick="showAnime(${i})">
                         <img src="${anime.image || 'https://via.placeholder.com/300x450?text=FAnimeList'}">
                         <div class="anime-card-info">
                             <h4 style="margin:0">${anime.name}</h4>
+                            <span style="font-size: 0.7rem; background:${badgeColor}; color:white; padding: 2px 8px; border-radius: 12px; font-weight: bold; display: inline-block; margin: 5px 0;">${badgeStatus}</span><br>
                             <small style="color:var(--primary); font-weight:bold;">${anime.vistos.length} / ${anime.caps} caps</small>
                         </div>
                     </div>
@@ -235,13 +331,28 @@
             list.innerHTML = '';
             document.getElementById('progress-text').innerText = `${anime.vistos.length} / ${anime.caps} VISTOS`;
 
+            const baseDate = anime.startDate ? new Date(anime.startDate) : null;
+
             for (let i = 1; i <= anime.caps; i++) {
                 const isVisto = anime.vistos.includes(i);
+                let infoExtra = '';
+
+                // Solo calcular e imprimir fechas si el anime está en emisión y tiene fecha asignada
+                if (anime.status === 'emision' && baseDate) {
+                    const epDate = new Date(baseDate);
+                    epDate.setDate(baseDate.getDate() + (i - 1) * 7);
+                    const dateStr = epDate.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                    infoExtra = `<small style="opacity: 0.7;">Estreno: ${dateStr}</small>`;
+                }
+
                 const div = document.createElement('div');
                 div.className = `ep-row ${isVisto ? 'is-visto' : ''}`;
                 div.innerHTML = `
                     <div class="ep-number">${i}</div>
-                    <div style="font-weight:600">Episodio ${i}</div>
+                    <div style="display:flex; flex-direction:column;">
+                        <span style="font-weight:600">Episodio ${i}</span>
+                        ${infoExtra}
+                    </div>
                     <div class="visto-badge">${isVisto ? 'VISTO' : 'PENDIENTE'}</div>
                 `;
                 div.onclick = () => {
@@ -268,6 +379,74 @@
                 animes.splice(currentIdx, 1);
                 localStorage.setItem('fAnimeList', JSON.stringify(animes));
                 showMenu();
+            }
+        }
+
+        function changeMonth(direction) {
+            calendarDate.setMonth(calendarDate.getMonth() + direction);
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+
+            const year = calendarDate.getFullYear();
+            const month = calendarDate.getMonth();
+
+            const monthName = calendarDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+            document.getElementById('calendar-month-year').innerText = monthName;
+
+            const dayNames = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+            dayNames.forEach(day => {
+                grid.innerHTML += `<div class="calendar-day-name">${day}</div>`;
+            });
+
+            const firstDayIndex = new Date(year, month, 1).getDay();
+            const adjustedFirstDay = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+            const totalDays = new Date(year, month + 1, 0).getDate();
+
+            for (let i = 0; i < adjustedFirstDay; i++) {
+                grid.innerHTML += `<div class="calendar-day empty"></div>`;
+            }
+
+            const today = new Date();
+
+            for (let day = 1; day <= totalDays; day++) {
+                const currentCellDate = new Date(year, month, day);
+                const isToday = currentCellDate.toDateString() === today.toDateString();
+
+                let dayClass = 'calendar-day';
+                if (isToday) dayClass += ' today';
+
+                let releasesHTML = '';
+                animes.forEach((anime, animeIdx) => {
+                    // FILTRO CRÍTICO: Si está fuera de emisión o no tiene fecha de inicio, NO aparece en el calendario.
+                    if (anime.status === 'finalizado' || !anime.startDate) return;
+
+                    const baseDate = new Date(anime.startDate);
+
+                    for (let ep = 1; ep <= anime.caps; ep++) {
+                        const epDate = new Date(baseDate);
+                        epDate.setDate(baseDate.getDate() + (ep - 1) * 7);
+
+                        if (epDate.getFullYear() === year && epDate.getMonth() === month && epDate.getDate() === day) {
+                            releasesHTML += `
+                                <div class="calendar-event" onclick="event.stopPropagation(); showAnime(${animeIdx})" title="${anime.name} - Ep ${ep}">
+                                    <img src="${anime.image || 'https://via.placeholder.com/150'}">
+                                    <span>Ep ${ep}: ${anime.name}</span>
+                                </div>
+                            `;
+                        }
+                    }
+                });
+
+                grid.innerHTML += `
+                    <div class="${dayClass}">
+                        <div class="day-number">${day}</div>
+                        <div class="calendar-releases">${releasesHTML}</div>
+                    </div>
+                `;
             }
         }
 
